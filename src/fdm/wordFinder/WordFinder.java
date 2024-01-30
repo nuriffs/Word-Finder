@@ -1,20 +1,23 @@
 package fdm.wordFinder;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class WordFinder {
 
-	private char[][] board;
+    private char[][] board;
     private Trie trie;
 
     public WordFinder(String boardString, List<String> dictionary) {
-        initializeBoard(boardString);
-        initializeTrie(dictionary);
+        initialiseBoard(boardString);
+        initialiseTrie(dictionary);
     }
 
-    private void initializeBoard(String boardString) {
+    private void initialiseBoard(String boardString) {
+        boardString = boardString.replace("\\n", "\n");
         String[] rows = boardString.split("\n");
         int numRows = rows.length;
         int numCols = rows[0].length();
@@ -28,7 +31,7 @@ public class WordFinder {
         }
     }
 
-    private void initializeTrie(List<String> dictionary) {
+    private void initialiseTrie(List<String> dictionary) {
         trie = new Trie();
         for (String word : dictionary) {
             trie.insert(word.toLowerCase());
@@ -72,19 +75,33 @@ public class WordFinder {
     private boolean isValidWord(String word) {
         return word.length() >= 3;
     }
-    
 
-    public static void main(String[] args) {
-        String boardString = "EATE\nLXRR\nARTR\nITSE\n";
-        List<String> dictionary = new ArrayList<>();
-        dictionary.add("art");
-        dictionary.add("later");
-        dictionary.add("extraterrestrial");
-        dictionary.add("eat");
-        dictionary.add("ate");
+    private static List<String> readWordListFromFile(String filePath) throws IOException {
+        List<String> wordList = new ArrayList<>();
+        Scanner fileScanner = new Scanner(new File(filePath));
 
-        WordFinder wordSearch = new WordFinder(boardString, dictionary);
-        wordSearch.printBoard();
-        wordSearch.searchWords();
+        while (fileScanner.hasNext()) {
+            wordList.add(fileScanner.next().toLowerCase());
+        }
+
+        fileScanner.close();
+        return wordList;
     }
+    
+    public static void main(String[] args) {
+        try {
+			@SuppressWarnings("resource")
+			String boardString = new Scanner(new File("src/wordBoard.txt")).useDelimiter("\\Z").next();
+
+			List<String> dictionary = readWordListFromFile("src/wordLists.txt");
+
+            WordFinder wordSearch = new WordFinder(boardString, dictionary);
+            wordSearch.printBoard();
+            wordSearch.searchWords();
+        } catch (IOException e) {
+            System.err.println("Error reading the board file: " + e.getMessage());
+        }
+    }
+
+    
 }
